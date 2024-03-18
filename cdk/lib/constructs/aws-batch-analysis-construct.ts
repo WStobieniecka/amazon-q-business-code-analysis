@@ -2,11 +2,11 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as batch from "aws-cdk-lib/aws-batch";
 import * as ecs from "aws-cdk-lib/aws-ecs";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { assert } from "console";
+import {IVpc} from "aws-cdk-lib/aws-ec2";
 
 export interface AwsBatchAnalysisProps extends cdk.StackProps {
+  readonly vpc: IVpc;
   readonly qAppName: string;
   readonly qAppRoleArn: string;
   readonly repository: string;
@@ -69,12 +69,8 @@ export class AwsBatchAnalysisConstruct extends Construct {
         destinationKeyPrefix: "code-processing",
       });
 
-      const vpc = new ec2.Vpc(this, 'Vpc', {
-        maxAzs: 2,
-      });
-
       const computeEnvironment = new batch.FargateComputeEnvironment(this, 'QScriptComputeEnv', {
-        vpc,
+        vpc: props.vpc,
       });
 
       const jobQueue = new batch.JobQueue(this, 'QProcessingJobQueue', {
